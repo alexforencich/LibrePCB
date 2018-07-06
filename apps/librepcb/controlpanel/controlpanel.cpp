@@ -125,13 +125,12 @@ ControlPanel::ControlPanel(Workspace& workspace) :
 
     loadSettings();
 
-    // parse command line arguments and open all project files
-    foreach (const QString& arg, qApp->arguments())
-    {
-        FilePath filepath(arg);
-        if ((filepath.isExistingFile()) && (filepath.getSuffix() == "lpp"))
-            openProject(filepath);
-    }
+    // slightly delay opening projects to not block processing of other important events
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
+    QTimer::singleShot(10, this, &ControlPanel::openProjectsPassedByCommandLine);
+#else
+    QTimer::singleShot(10, this, SLOT(openProjectsPassedByCommandLine()));
+#endif
 
     // start scanning the workspace library (asynchronously)
     mWorkspace.getLibraryDb().startLibraryRescan();
@@ -410,6 +409,17 @@ bool ControlPanel::closeAllLibraryEditors(bool askForSave) noexcept
 /*****************************************************************************************
  *  Private Slots
  ****************************************************************************************/
+
+void ControlPanel::openProjectsPassedByCommandLine() noexcept
+{
+    // parse command line arguments and open all project files
+    foreach (const QString& arg, qApp->arguments()) {
+        FilePath filepath(arg);
+        if ((filepath.isExistingFile()) && (filepath.getSuffix() == "lpp")) {
+            openProject(filepath);
+        }
+    }
+}
 
 void ControlPanel::projectEditorClosed() noexcept
 {

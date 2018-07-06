@@ -104,6 +104,7 @@ class ControlPanel final : public QMainWindow
     private slots:
 
         // private slots
+        void openProjectsPassedByCommandLine() noexcept;
         void projectEditorClosed() noexcept;
 
         // Actions
