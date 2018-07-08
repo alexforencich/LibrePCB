@@ -28,3 +28,24 @@ else
   ./build/install/opt/bin/librepcb-cli.exe --help
 fi
 
+# run functional tests
+if [ "${TRAVIS_OS_NAME-}" = "linux" ]
+then
+  EXECUTABLE="`pwd`/LibrePCB-x86_64.AppImage"
+  pushd ./tests/funq
+  xvfb-run -a --server-args="-screen 0 1024x768x24" pytest -v --librepcb-executable="$EXECUTABLE"
+  popd
+elif [ "${TRAVIS_OS_NAME-}" = "osx" ]
+then
+  # TODO: funq does not yet work on macOS
+  #EXECUTABLE="`pwd`/build/output/librepcb.app/Contents/MacOS/librepcb"
+  #pushd ./tests/funq
+  #funq "$EXECUTABLE"
+  #pytest -v --librepcb-executable="$EXECUTABLE"
+  #popd
+else
+  EXECUTABLE="`pwd`/build/install/opt/bin/librepcb.exe"
+  pushd ./tests/funq
+  pytest -v --librepcb-executable="$EXECUTABLE"
+  popd
+fi
