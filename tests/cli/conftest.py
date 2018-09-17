@@ -43,10 +43,11 @@ class CliExecutor(object):
         return os.path.join(self.tmpdir, relpath)
 
     def run(self, args):
-        res = subprocess.run([self.executable] + args, cwd=self.tmpdir,
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                             universal_newlines=True, timeout=10.0, env=self._env())
-        return res.returncode, res.stdout, res.stderr
+        with subprocess.Popen([self.executable] + args, cwd=self.tmpdir,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                              universal_newlines=True, env=self._env()) as p:
+            stdout, stderr = p.communicate(timeout=10.0)
+            return p.returncode, stdout.splitlines(), stderr.splitlines()
 
     def _env(self):
         env = os.environ
